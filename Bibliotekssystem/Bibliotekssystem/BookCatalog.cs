@@ -1,0 +1,22 @@
+﻿namespace Bibliotekssystem
+{
+    public class BookCatalog
+    {
+        private List<Book> books = new List<Book>();
+
+        public void AddBook(Book book)
+        {
+            books.Add(book);
+        }
+
+        public List<Book> GetBooks()
+        {
+            return books;
+        }
+
+        public Book GetBook(string isbn)
+        {
+            return books.FirstOrDefault(b => b.ISBN == isbn);
+        }
+    }
+}
