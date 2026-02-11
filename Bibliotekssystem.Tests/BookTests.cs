@@ -16,20 +16,31 @@ namespace Bibliotekssystem.Tests
             Assert.Equal("Testbok", book.Title);
             Assert.Equal("Testförfattare", book.Author);
             Assert.Equal(2024, book.PublishedYear);
-            Assert.True(book.IsAvailable);
+           
         }
 
         [Fact]
-        public void IsAvailable_ShouldBeTrueForNewBook()
+        public void NewBook_ShouldNotBeLoaned_WhenNoLoansExist()
         {
-            // Arrange & Act
+
+            var library = new Library();
             var book = new Book("Ny bok", "Författare", 2020, "ISBN-1");
+            var member = new Member("M001", "Test Person", "test@test.com");
+
+            library.BookCatalog.AddBook(book);
+            library.MemberRegistry.AddMember(member);
+
+            // Act
+            var activeLoansBefore = library.LoanManager.GetActiveLoans();
 
             // Assert
-            Assert.True(book.IsAvailable);
+            Assert.Empty(activeLoansBefore);
         }
 
-        [Fact]
+
+
+
+            [Fact]
         public void GetInfo_ShouldReturnFormattedString()
         {
             // Arrange

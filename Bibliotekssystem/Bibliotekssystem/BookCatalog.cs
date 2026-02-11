@@ -9,8 +9,7 @@
             books.Add(book);
         }
 
-        public List<Book> GetBooks()
-        {
+        public IReadOnlyList<Book>GetBooks() {
             return books;
         }
 

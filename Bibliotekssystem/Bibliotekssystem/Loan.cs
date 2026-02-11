@@ -8,10 +8,10 @@ namespace Bibliotekssystem
 {
     public class Loan
     {
-        public Book Book { get; set; }
-        public Member Member { get; set; }
+        public Book Book { get; }
+        public Member Member { get; }
         public DateTime LoanDate { get; private set; }
-        public DateTime DueDate { get; set; }
+        public DateTime DueDate { get;}
         public DateTime? ReturnDate { get; private set; }
 
 

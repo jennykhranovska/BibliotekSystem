@@ -12,7 +12,7 @@ namespace Bibliotekssystem
             members.Add(member);
         }
 
-        public List<Member> GetMembers()
+        public IReadOnlyList<Member> GetMembers()
         {
             return members;
         }

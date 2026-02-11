@@ -19,7 +19,6 @@ namespace Bibliotekssystem
 
         public int PublishedYear { get; }
 
-        public bool IsAvailable { get; }
 
 
         public Book(string title, string author, int publishedYear, string isbn)
@@ -29,7 +28,7 @@ namespace Bibliotekssystem
             Author = author;
             PublishedYear = publishedYear;
             ISBN = isbn;
-            IsAvailable = true;
+       
         }
 
         public bool Matches(string searchTerm)
