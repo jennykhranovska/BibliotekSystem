@@ -18,6 +18,9 @@ namespace Bibliotekssystem
         public string Author { get; }
 
         public int PublishedYear { get; }
+        public bool IsAvailable { get; private set; } = true;
+
+
 
 
 
@@ -43,6 +46,10 @@ namespace Bibliotekssystem
         {
             return $"{Title} av {Author} ({PublishedYear}) - ISBN: {ISBN}";
         }
+
+
+        public void MarkAsLoaned() => IsAvailable = false;
+        public void MarkAsReturned() => IsAvailable = true;
 
     }
 }

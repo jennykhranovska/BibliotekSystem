@@ -20,7 +20,12 @@ namespace Bibliotekssystem
             var loanDate = DateTime.Now;
             var dueDate = loanDate.AddDays(days);
 
+            book.MarkAsLoaned();
             loans.Add(new Loan(book, member, loanDate, dueDate));
+
+        
+
+
         }
 
         public void ReturnBook(string isbn)
@@ -31,6 +36,8 @@ namespace Bibliotekssystem
                 throw new InvalidOperationException("Hittade inget aktivt lån för den boken.");
 
             activeLoan.ReturnBook();
+            activeLoan.Book.MarkAsReturned();
+
         }
 
         public List<Loan> GetLoans()
@@ -42,5 +49,8 @@ namespace Bibliotekssystem
         {
             return loans.Where(l => !l.IsReturned).ToList();
         }
+
+
+
     }
 }

@@ -45,5 +45,47 @@ namespace Bibliotekssystem.Tests
             Assert.True(loan.IsReturned);
             Assert.NotNull(loan.ReturnDate);
         }
+
+
+
+        [Fact]
+        public void LoanBook_ShouldSet_IsAvailable_ToFalse()
+        {
+            // Arrange
+            var library = new Library();
+            var book = new Book("Test", "Author", 2024, "123");
+            var member = new Member("M001", "Test Person", "test@test.com");
+
+            library.BookCatalog.AddBook(book);
+            library.MemberRegistry.AddMember(member);
+
+            // Act
+            library.LoanManager.LoanBook(book, member);
+
+            // Assert
+            Assert.False(book.IsAvailable);
+        }
+
+        [Fact]
+        public void ReturnBook_ShouldSet_IsAvailable_ToTrue()
+        {
+            // Arrange
+            var library = new Library();
+            var book = new Book("Test", "Author", 2024, "123");
+            var member = new Member("M001", "Test Person", "test@test.com");
+
+            library.BookCatalog.AddBook(book);
+            library.MemberRegistry.AddMember(member);
+
+            library.LoanManager.LoanBook(book, member);
+
+            // Act
+            library.LoanManager.ReturnBook("123");
+
+            // Assert
+            Assert.True(book.IsAvailable);
+        }
+
     }
+
 }
