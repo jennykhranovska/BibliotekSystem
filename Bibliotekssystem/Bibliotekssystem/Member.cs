@@ -22,6 +22,16 @@ namespace Bibliotekssystem
 
         public Member(string memberId, string name, string email)
         {
+
+            if (string.IsNullOrWhiteSpace(memberId))
+                throw new ArgumentException("MemberId cannot be empty.");
+
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Name cannot be empty.");
+
+            if (string.IsNullOrWhiteSpace(email))
+                throw new ArgumentException("Email cannot be empty.");
+
             MemberId = memberId;
             Name = name;
             Email = email;

@@ -49,5 +49,15 @@ namespace Bibliotekssystem.Tests
             Assert.Contains("2024", info);
             Assert.Contains("ISBN-1", info);
         }
+
+
+
+        [Fact]
+        public void Constructor_ShouldThrowException_WhenTitleIsEmpty()
+        {
+            Assert.Throws<ArgumentException>(() =>
+                new Book("", "Author", 2020, "123"));
+        }
+
     }
 }
