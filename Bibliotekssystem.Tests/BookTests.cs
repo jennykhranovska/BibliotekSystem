@@ -20,27 +20,21 @@ namespace Bibliotekssystem.Tests
         }
 
         [Fact]
-        public void NewBook_ShouldNotBeLoaned_WhenNoLoansExist()
+        public void Matches_ShouldReturnTrue_WhenSearchTermMatchesTitle()
         {
-
-            var library = new Library();
-            var book = new Book("Ny bok", "Författare", 2020, "ISBN-1");
-            var member = new Member("M001", "Test Person", "test@test.com");
-
-            library.BookCatalog.AddBook(book);
-            library.MemberRegistry.AddMember(member);
+            // Arrange
+            var book = new Book("Sagan om ringen", "J.R.R. Tolkien", 1954, "123");
 
             // Act
-            var activeLoansBefore = library.LoanManager.GetActiveLoans();
+            var result = book.Matches("ringen");
 
             // Assert
-            Assert.Empty(activeLoansBefore);
+            Assert.True(result);
         }
 
 
 
-
-            [Fact]
+        [Fact]
         public void GetInfo_ShouldReturnFormattedString()
         {
             // Arrange
