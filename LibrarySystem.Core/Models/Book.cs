@@ -10,15 +10,14 @@ namespace LibrarySystem.Core.Models
     public class Book : ISearchable
     {
 
-        public string ISBN { get; }
-
-        public string Title { get; }
-
-
-        public string Author { get; }
-
-        public int PublishedYear { get; }
-        public bool IsAvailable { get; private set; } = true;
+        public string ISBN { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string Author { get; set; } = string.Empty;
+        public int PublishedYear { get; set; }
+        public bool IsAvailable { get; set; } = true;
+        public ICollection<Loan> Loans { get; set; } = new List<Loan>();
+        public Book() { }
+        public int Id { get; private set; }
 
         public void MarkAsLoaned() => IsAvailable = false;
         public void MarkAsReturned() => IsAvailable = true;

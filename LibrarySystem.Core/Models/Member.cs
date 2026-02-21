@@ -1,30 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-
 
 namespace LibrarySystem.Core.Models
 {
     public class Member : ISearchable
-
     {
-        
-        public string MemberId { get;}
-        public string Name { get; }
+        public string MemberId { get; private set; }
+        public string Name { get; private set; }
         public string Email { get; set; }
 
-        public DateTime MemberSince { get; }
+        public DateTime MemberSince { get; private set; }
 
-        private List<Book> borrowedBooks = new();
+        private readonly List<Book> borrowedBooks = new();
         public IReadOnlyList<Book> BorrowedBooks => borrowedBooks;
 
+        // EF Core behöver en parameterlös konstruktor
+        private Member() { }
 
         public Member(string memberId, string name, string email)
         {
-
             if (string.IsNullOrWhiteSpace(memberId))
                 throw new ArgumentException("MemberId cannot be empty.");
 
@@ -40,11 +34,7 @@ namespace LibrarySystem.Core.Models
             MemberSince = DateTime.Now;
         }
 
-
-
         public void ShowMemberInfo()
-
-
         {
             Console.WriteLine($"MemberId: {MemberId}");
             Console.WriteLine($"Name: {Name}");
@@ -52,7 +42,6 @@ namespace LibrarySystem.Core.Models
             Console.WriteLine($"Member since: {MemberSince:yyyy-MM-dd}");
             Console.WriteLine($"Borrowed books: {BorrowedBooks.Count}");
         }
-
 
         public bool Matches(string searchTerm)
         {
@@ -62,11 +51,5 @@ namespace LibrarySystem.Core.Models
                 || Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
                 || (Email?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false);
         }
-
-
-
     }
-
-
-
 }
