@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Bibliotekssystem
+
+namespace LibrarySystem.Core.Models
+
 {
     public class LoanManager
     {

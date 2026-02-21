@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
-using Bibliotekssystem;
 
-namespace Bibliotekssystem
+
+namespace LibrarySystem.Core.Models
 {
     internal class Program
     {
@@ -220,8 +220,7 @@ namespace Bibliotekssystem
             Pause();
         }
 
-        // ===== HJÄLP =====
-
+   
         static bool IsLoaned(Library library, string isbn)
         {
             return library.LoanManager.GetActiveLoans().Any(l => l.Book.ISBN == isbn);

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Bibliotekssystem;
 using Xunit;
+using LibrarySystem.Core.Models;
 
 namespace Bibliotekssystem.Tests
 {

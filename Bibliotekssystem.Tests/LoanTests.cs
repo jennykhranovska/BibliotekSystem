@@ -1,6 +1,7 @@
 ﻿using System;
 using Bibliotekssystem;
 using Xunit;
+using LibrarySystem.Core.Models;
 
 namespace Bibliotekssystem.Tests
 {

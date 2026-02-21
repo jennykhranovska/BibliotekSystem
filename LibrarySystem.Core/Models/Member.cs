@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bibliotekssystem
+
+
+namespace LibrarySystem.Core.Models
 {
     public class Member : ISearchable
 

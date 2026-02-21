@@ -1,4 +1,8 @@
-﻿namespace Bibliotekssystem
+﻿
+
+
+
+namespace LibrarySystem.Core.Models
 {
     public class BookCatalog
     {

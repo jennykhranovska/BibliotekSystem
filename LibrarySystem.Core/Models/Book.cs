@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bibliotekssystem
+namespace LibrarySystem.Core.Models
 {
     public class Book : ISearchable
     {

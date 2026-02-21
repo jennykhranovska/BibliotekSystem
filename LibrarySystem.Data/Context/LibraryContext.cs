@@ -4,11 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bibliotekssystem
+namespace LibrarySystem.Data.Context
 {
-    public interface ISearchable
+    internal class LibraryContext
     {
-
-        bool Matches(string searchTerm);
     }
 }
