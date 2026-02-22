@@ -16,8 +16,15 @@ namespace LibrarySystem.Core.Models
         public LoanManager LoanManager { get; }
 
 
-
         public Library()
+        {
+            BookCatalog = new BookCatalog();
+            MemberRegistry = new MemberRegistry();
+            LoanManager = new LoanManager();
+        }
+
+
+        public Library(BookCatalog bookCatalog)
         {
             BookCatalog = new BookCatalog();
             MemberRegistry = new MemberRegistry();

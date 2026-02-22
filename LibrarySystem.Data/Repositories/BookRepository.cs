@@ -1,0 +1,66 @@
+﻿using LibrarySystem.Core.Interfaces;
+using LibrarySystem.Core.Models;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace LibrarySystem.Data.Repositories
+{
+    public class BookRepository : IBookRepository
+    {
+        private readonly LibraryContext _context;
+
+        public BookRepository(LibraryContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<IEnumerable<Book>> GetAllAsync()
+            => await _context.Books.ToListAsync();
+
+        public async Task<Book?> GetByIdAsync(int id)
+            => await _context.Books.FirstOrDefaultAsync(b => b.Id == id);
+
+        public async Task<Book?> GetByISBNAsync(string isbn)
+            => await _context.Books.FirstOrDefaultAsync(b => b.ISBN == isbn);
+
+        public async Task AddAsync(Book book)
+        {
+            await _context.Books.AddAsync(book);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(Book book)
+        {
+            _context.Books.Update(book);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var book = await GetByIdAsync(id);
+            if (book == null) return;
+
+            _context.Books.Remove(book);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<Book>> SearchAsync(string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+                return await GetAllAsync();
+
+            searchTerm = searchTerm.Trim();
+
+            return await _context.Books
+                .Where(b =>
+                    b.Title.Contains(searchTerm) ||
+                    b.Author.Contains(searchTerm) ||
+                    b.ISBN.Contains(searchTerm))
+                .ToListAsync();
+        }
+    }
+}

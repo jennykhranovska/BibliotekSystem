@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
+using LibrarySystem.Core.Models;
 
-
-namespace LibrarySystem.Core.Models
+namespace Bibliotekssystem
 {
     internal class Program
     {
