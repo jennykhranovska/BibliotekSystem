@@ -2,23 +2,32 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Linq; 
 using System.Text;
 using System.Threading.Tasks;
 
-public class LibraryContext : DbContext
+namespace LibrarySystem.Data.Context
 {
-    public DbSet<Book> Books { get; set; }
-    public DbSet<Member> Members { get; set; }
-    public DbSet<Loan> Loans { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
+    public class LibraryContext : DbContext
     {
-        options.UseSqlite("Data Source=library.db");
-    }
+        public LibraryContext(DbContextOptions<LibraryContext> options)
+    : base(options)
+        {
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        // Konfigurera relationer och constraints här
+        }
+
+        public DbSet<Book> Books { get; set; }
+        public DbSet<Member> Members { get; set; }
+        public DbSet<Loan> Loans { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder options)
+        {
+            options.UseSqlite("Data Source=library.db");
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Konfigurera relationer och constraints här
+        }
     }
 }

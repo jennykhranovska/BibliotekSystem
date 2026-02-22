@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace LibrarySystem.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class AddBookPrimaryKey : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

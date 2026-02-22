@@ -1,3 +1,5 @@
+using LibrarySystem.Data.Context;
+using Microsoft.EntityFrameworkCore;
 using LibrarySystem.Web.Components;
 
 namespace LibrarySystem.Web
@@ -12,6 +14,8 @@ namespace LibrarySystem.Web
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
+            builder.Services.AddDbContext<LibraryContext>(options =>
+    options.UseSqlite("Data Source=library.db"));
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
