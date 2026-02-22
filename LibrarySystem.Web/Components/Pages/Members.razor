@@ -1,0 +1,67 @@
+﻿@page "/members"
+@using LibrarySystem.Core.Models
+@using Microsoft.EntityFrameworkCore
+@inject LibrarySystem.Data.Context.LibraryContext Context
+
+<h3>Medlemmar</h3>
+
+@if (members == null)
+{
+    <p>Laddar...</p>
+}
+else if (!members.Any())
+{
+    <p>Inga medlemmar hittades.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Medlemsnummer</th>
+                <th>Namn</th>
+                <th>Email</th>
+                <th>Medlem sedan</th>
+                <th>Aktiva lån</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var m in members)
+            {
+                <tr>
+                    <td>@m.MemberId</td>
+                    <td>@m.Name</td>
+                    <td>@m.Email</td>
+                    <td>@m.MemberSince.ToShortDateString()</td>
+                    <td>@ActiveLoansFor(m.MemberId)</td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-primary"
+                           href="@($"/members/{m.MemberId}")">
+                            Detaljer
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Member>? members;
+    private List<Loan> loans = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        members = await Context.Members.AsNoTracking().ToListAsync();
+        loans = await Context.Loans.AsNoTracking().ToListAsync();
+    }
+
+    private int ActiveLoansFor(string memberId)
+    {
+        return loans.Count(l =>
+            l.Member != null &&
+            l.Member.MemberId == memberId &&
+            l.ReturnDate == null);
+    }
+}

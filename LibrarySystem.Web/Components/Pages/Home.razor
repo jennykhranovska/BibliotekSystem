@@ -1,7 +1,45 @@
 ﻿@page "/"
+@using Microsoft.EntityFrameworkCore
+@inject LibrarySystem.Data.Context.LibraryContext Context
 
-<PageTitle>Home</PageTitle>
+<h1>Välkommen</h1>
+<p>Snabböversikt av biblioteket.</p>
 
-<h1>Hello, world!</h1>
+@if (!loaded)
+{
+    <p>Laddar statistik...</p>
+}
+else
+{
+    <ul>
+        <li>Antal böcker: @bookCount</li>
+        <li>Antal medlemmar: @memberCount</li>
+        <li>Aktiva lån: @activeLoanCount</li>
+        <li>Försenade lån: @overdueLoanCount</li>
+    </ul>
 
-Welcome to your new app.
+    <nav>
+        <a href="/books">Böcker</a> |
+        <a href="/members">Medlemmar</a> |
+        <a href="/loans">Utlåning</a>
+    </nav>
+}
+
+@code {
+    private bool loaded;
+    private int bookCount;
+    private int memberCount;
+    private int activeLoanCount;
+    private int overdueLoanCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        bookCount = await Context.Books.CountAsync();
+        memberCount = await Context.Members.CountAsync();
+
+        activeLoanCount = await Context.Loans.CountAsync(l => l.ReturnDate == null);
+        overdueLoanCount = await Context.Loans.CountAsync(l => l.ReturnDate == null && l.DueDate < DateTime.Now);
+
+        loaded = true;
+    }
+}

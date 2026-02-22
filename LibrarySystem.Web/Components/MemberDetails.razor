@@ -1,0 +1,69 @@
+﻿@page "/members/{memberId}"
+@using LibrarySystem.Core.Models
+@using Microsoft.EntityFrameworkCore
+@inject LibrarySystem.Data.Context.LibraryContext Context
+
+<h3>Medlemsdetaljer</h3>
+
+@if (member == null)
+{
+    <p>Hittar inte medlemmen.</p>
+}
+else
+{
+    <p><b>Medlemsnummer:</b> @member.MemberId</p>
+    <p><b>Namn:</b> @member.Name</p>
+    <p><b>Email:</b> @member.Email</p>
+    <p><b>Medlem sedan:</b> @member.MemberSince.ToShortDateString()</p>
+
+    <h5 class="mt-4">Aktiva lån</h5>
+
+    @if (activeLoans.Count == 0)
+    {
+        <p>Inga aktiva lån.</p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Bok</th>
+                    <th>Lånedatum</th>
+                    <th>Förfallodatum</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var l in activeLoans)
+                {
+                    <tr>
+                        <td>@(l.Book?.Title ?? "(okänd bok)")</td>
+                        <td>@l.LoanDate.ToShortDateString()</td>
+                        <td>@l.DueDate.ToShortDateString()</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <a class="btn btn-sm btn-outline-secondary mt-3" href="/members">Tillbaka</a>
+}
+
+@code {
+    [Parameter] public string memberId { get; set; } = "";
+
+    private Member? member;
+    private List<Loan> activeLoans = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        member = await Context.Members.AsNoTracking()
+            .FirstOrDefaultAsync(m => m.MemberId == memberId);
+
+        activeLoans = await Context.Loans.AsNoTracking()
+            .Include(l => l.Book)
+            .Include(l => l.Member)
+            .Where(l => l.Member != null && l.Member.MemberId == memberId && l.ReturnDate == null)
+            .OrderByDescending(l => l.LoanDate)
+            .ToListAsync();
+    }
+}

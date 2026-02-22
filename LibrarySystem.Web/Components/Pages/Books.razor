@@ -1,0 +1,128 @@
+﻿@page "/books"
+@using LibrarySystem.Core.Models
+@using Microsoft.EntityFrameworkCore
+@inject LibrarySystem.Data.Context.LibraryContext Context
+
+<h3>Boklista</h3>
+
+<div class="mb-3">
+    <input class="form-control"
+           placeholder="Sök på titel, författare eller ISBN..."
+           @bind="searchTerm"
+           @bind:event="oninput" />
+</div>
+
+@if (books == null)
+{
+    <p>Laddar...</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th style="cursor:pointer" @onclick="() => SortBy(nameof(Book.Title))">
+                    Titel @SortIcon(nameof(Book.Title))
+                </th>
+                <th style="cursor:pointer" @onclick="() => SortBy(nameof(Book.Author))">
+                    Författare @SortIcon(nameof(Book.Author))
+                </th>
+                <th style="cursor:pointer" @onclick="() => SortBy(nameof(Book.PublishedYear))">
+                    År @SortIcon(nameof(Book.PublishedYear))
+                </th>
+                <th style="cursor:pointer" @onclick="() => SortBy(nameof(Book.ISBN))">
+                    ISBN @SortIcon(nameof(Book.ISBN))
+                </th>
+                <th style="cursor:pointer" @onclick="() => SortBy(nameof(Book.IsAvailable))">
+                    Status @SortIcon(nameof(Book.IsAvailable))
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var b in FilteredAndSortedBooks())
+            {
+                <tr>
+                    <td>@b.Title</td>
+                    <td>@b.Author</td>
+                    <td>@b.PublishedYear</td>
+                    <td>@b.ISBN</td>
+                    <td>
+                        @if (b.IsAvailable)
+                        {
+                            <span class="badge bg-success">Tillgänglig</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Utlånad</span>
+                        }
+                    </td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-primary" href="@($"/books/{b.Id}")">Detaljer</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    private List<Book>? books;
+    private string searchTerm = "";
+
+    private string sortColumn = nameof(Book.Title);
+    private bool sortAscending = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        books = await Context.Books.AsNoTracking().ToListAsync();
+    }
+
+    private IEnumerable<Book> FilteredAndSortedBooks()
+    {
+        if (books == null) return Enumerable.Empty<Book>();
+
+        IEnumerable<Book> query = books;
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+            query = query.Where(b => b.Matches(searchTerm));
+
+        query = (sortColumn, sortAscending) switch
+        {
+            (nameof(Book.Title), true) => query.OrderBy(b => b.Title),
+            (nameof(Book.Title), false) => query.OrderByDescending(b => b.Title),
+
+            (nameof(Book.Author), true) => query.OrderBy(b => b.Author),
+            (nameof(Book.Author), false) => query.OrderByDescending(b => b.Author),
+
+            (nameof(Book.PublishedYear), true) => query.OrderBy(b => b.PublishedYear),
+            (nameof(Book.PublishedYear), false) => query.OrderByDescending(b => b.PublishedYear),
+
+            (nameof(Book.ISBN), true) => query.OrderBy(b => b.ISBN),
+            (nameof(Book.ISBN), false) => query.OrderByDescending(b => b.ISBN),
+
+            (nameof(Book.IsAvailable), true) => query.OrderBy(b => b.IsAvailable),
+            (nameof(Book.IsAvailable), false) => query.OrderByDescending(b => b.IsAvailable),
+
+            _ => query
+        };
+
+        return query;
+    }
+
+    private void SortBy(string column)
+    {
+        if (sortColumn == column)
+            sortAscending = !sortAscending;
+        else
+        {
+            sortColumn = column;
+            sortAscending = true;
+        }
+    }
+
+    private string SortIcon(string column)
+    {
+        if (sortColumn != column) return "";
+        return sortAscending ? "▲" : "▼";
+    }
+}

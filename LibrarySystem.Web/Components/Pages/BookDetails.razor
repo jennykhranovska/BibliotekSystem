@@ -1,0 +1,69 @@
+﻿@page "/books/{id:int}"
+@using LibrarySystem.Core.Models
+@using Microsoft.EntityFrameworkCore
+@inject LibrarySystem.Data.Context.LibraryContext Context
+
+<h3>Bokdetaljer</h3>
+
+@if (book == null)
+{
+    <p>Hittar inte boken.</p>
+}
+else
+{
+    <p><b>Titel:</b> @book.Title</p>
+    <p><b>Författare:</b> @book.Author</p>
+    <p><b>År:</b> @book.PublishedYear</p>
+    <p><b>ISBN:</b> @book.ISBN</p>
+    <p><b>Status:</b> @(book.IsAvailable ? "Tillgänglig" : "Utlånad")</p>
+
+    <h5>Lånehistorik</h5>
+
+    @if (loans.Count == 0)
+    {
+        <p>Ingen lånehistorik.</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Lånedatum</th>
+                    <th>Förfallodatum</th>
+                    <th>Returnerad</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var l in loans)
+                {
+                    <tr>
+                        <td>@l.LoanDate.ToShortDateString()</td>
+                        <td>@l.DueDate.ToShortDateString()</td>
+                        <td>@(l.ReturnDate?.ToShortDateString() ?? "Nej")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <p class="mt-3">
+        <a class="btn btn-sm btn-outline-secondary" href="/books">Tillbaka</a>
+    </p>
+}
+
+@code {
+    [Parameter] public int id { get; set; }
+
+    private Book? book;
+    private List<Loan> loans = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        book = await Context.Books.AsNoTracking().FirstOrDefaultAsync(b => b.Id == id);
+
+        loans = await Context.Loans.AsNoTracking()
+            .Where(l => l.BookId == id)
+            .OrderByDescending(l => l.LoanDate)
+            .ToListAsync();
+    }
+}

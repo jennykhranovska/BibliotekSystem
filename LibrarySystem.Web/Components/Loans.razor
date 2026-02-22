@@ -1,0 +1,186 @@
+﻿@page "/loans"
+@using LibrarySystem.Core.Models
+@using Microsoft.EntityFrameworkCore
+@inject LibrarySystem.Data.Context.LibraryContext Context
+
+<h3>Utlåning</h3>
+
+@if (!loaded)
+{
+    <p>Laddar...</p>
+}
+else
+{
+    <h5>Nytt lån</h5>
+
+    <div class="row g-2 align-items-end mb-4">
+        <div class="col-md-5">
+            <label class="form-label">Bok</label>
+            <select class="form-select" @bind="selectedBookId">
+                <option value="0">Välj bok...</option>
+                @foreach (var b in availableBooks)
+                {
+                    <option value="@b.Id">@b.Title (@b.ISBN)</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-5">
+            <label class="form-label">Medlem</label>
+            <select class="form-select" @bind="selectedMemberId">
+                <option value="">Välj medlem...</option>
+                @foreach (var m in members)
+                {
+                    <option value="@m.MemberId">@m.Name (@m.MemberId)</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <button class="btn btn-primary w-100" @onclick="CreateLoan" disabled="@(!CanCreateLoan)">
+                Låna
+            </button>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(message))
+    {
+        <div class="alert alert-info">@message</div>
+    }
+
+    <h5>Aktiva lån</h5>
+
+    @if (activeLoans.Count == 0)
+    {
+        <p>Inga aktiva lån.</p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Bok</th>
+                    <th>Medlem</th>
+                    <th>Lånedatum</th>
+                    <th>Förfallodatum</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var l in activeLoans)
+                {
+                    var overdue = l.ReturnDate == null && l.DueDate < DateTime.Now;
+                    <tr class="@(overdue ? "table-danger" : "")">
+                        <td>@(l.Book?.Title ?? "(okänd bok)")</td>
+                        <td>@(l.Member?.Name ?? "(okänd medlem)")</td>
+                        <td>@l.LoanDate.ToShortDateString()</td>
+                        <td>@l.DueDate.ToShortDateString()</td>
+                        <td>
+                            @if (overdue)
+                            {
+                                <span class="badge bg-danger">Försenad</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">OK</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@code {
+    private bool loaded;
+
+    private List<Book> availableBooks = new();
+    private List<Member> members = new();
+    private List<Loan> activeLoans = new();
+
+    private int selectedBookId;
+    private string selectedMemberId = "";
+
+    private string? message;
+
+    private bool CanCreateLoan => selectedBookId != 0 && !string.IsNullOrWhiteSpace(selectedMemberId);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadData();
+        loaded = true;
+    }
+
+    private async Task ReloadData()
+    {
+        availableBooks = await Context.Books.AsNoTracking()
+            .Where(b => b.IsAvailable)
+            .OrderBy(b => b.Title)
+            .ToListAsync();
+
+        members = await Context.Members.AsNoTracking()
+            .OrderBy(m => m.Name)
+            .ToListAsync();
+
+        activeLoans = await Context.Loans
+            .AsNoTracking()
+            .Include(l => l.Book)
+            .Include(l => l.Member)
+            .Where(l => l.ReturnDate == null)
+            .OrderByDescending(l => l.LoanDate)
+            .ToListAsync();
+    }
+
+    private async Task CreateLoan()
+    {
+        message = null;
+
+        var book = await Context.Books.FirstOrDefaultAsync(b => b.Id == selectedBookId);
+        if (book == null)
+        {
+            message = "Boken hittades inte.";
+            return;
+        }
+
+        // OBS: MemberId är string Member-modell.
+        var member = await Context.Members.FirstOrDefaultAsync(m => m.MemberId == selectedMemberId);
+        if (member == null)
+        {
+            message = "Medlemmen hittades inte.";
+            return;
+        }
+
+        if (!book.IsAvailable)
+        {
+            message = "Boken är inte tillgänglig.";
+            return;
+        }
+
+        var loanDate = DateTime.Now;
+        var dueDate = loanDate.AddDays(14);
+
+        // Skapa lån och uppdatera bokstatus
+        var loan = new Loan
+        {
+            BookId = book.Id,
+            Book = book,
+           
+            Member = member,
+            LoanDate = loanDate,
+            DueDate = dueDate,
+            ReturnDate = null
+        };
+
+        book.MarkAsLoaned();
+
+        Context.Loans.Add(loan);
+        await Context.SaveChangesAsync();
+
+        message = "Lån skapat.";
+        selectedBookId = 0;
+        selectedMemberId = "";
+
+        await ReloadData();
+    }
+}
