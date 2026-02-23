@@ -13,35 +13,44 @@ else
 {
     <h5>Nytt lån</h5>
 
-    <div class="row g-2 align-items-end mb-4">
-        <div class="col-md-5">
-            <label class="form-label">Bok</label>
-            <select class="form-select" @bind="selectedBookId">
-                <option value="0">Välj bok...</option>
-                @foreach (var b in availableBooks)
-                {
-                    <option value="@b.Id">@b.Title (@b.ISBN)</option>
-                }
-            </select>
-        </div>
+    <EditForm Model="@loanModel" OnValidSubmit="CreateLoan">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
-        <div class="col-md-5">
-            <label class="form-label">Medlem</label>
-            <select class="form-select" @bind="selectedMemberId">
-                <option value="">Välj medlem...</option>
-                @foreach (var m in members)
-                {
-                    <option value="@m.MemberId">@m.Name (@m.MemberId)</option>
-                }
-            </select>
-        </div>
+        <div class="row g-2 align-items-end mb-4">
 
-        <div class="col-md-2">
-            <button class="btn btn-primary w-100" @onclick="CreateLoan" disabled="@(!CanCreateLoan)">
-                Låna
-            </button>
+            <div class="col-md-5">
+                <label class="form-label">Bok</label>
+                <InputSelect class="form-select" @bind-Value="loanModel.BookId">
+                    <option value="0">Välj bok...</option>
+                    @foreach (var b in availableBooks)
+                    {
+                        <option value="@b.Id">@b.Title (@b.ISBN)</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => loanModel.BookId)" />
+            </div>
+
+            <div class="col-md-5">
+                <label class="form-label">Medlem</label>
+                <InputSelect class="form-select" @bind-Value="loanModel.MemberId">
+                    <option value="">Välj medlem...</option>
+                    @foreach (var m in members)
+                    {
+                        <option value="@m.MemberId">@m.Name (@m.MemberId)</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => loanModel.MemberId)" />
+            </div>
+
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100" type="submit">
+                    Låna
+                </button>
+            </div>
+
         </div>
-    </div>
+    </EditForm>
 
     @if (!string.IsNullOrWhiteSpace(message))
     {
@@ -64,8 +73,10 @@ else
                     <th>Lånedatum</th>
                     <th>Förfallodatum</th>
                     <th>Status</th>
+                    <th></th>
                 </tr>
             </thead>
+
             <tbody>
                 @foreach (var l in activeLoans)
                 {
@@ -99,12 +110,18 @@ else
     private List<Member> members = new();
     private List<Loan> activeLoans = new();
 
-    private int selectedBookId;
-    private string selectedMemberId = "";
-
     private string? message;
+    private LoanForm loanModel = new();
 
-    private bool CanCreateLoan => selectedBookId != 0 && !string.IsNullOrWhiteSpace(selectedMemberId);
+    private class LoanForm
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Välj bok")]
+        [System.ComponentModel.DataAnnotations.Range(1, int.MaxValue, ErrorMessage = "Välj bok")]
+        public int BookId { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Välj medlem")]
+        public string? MemberId { get; set; }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -136,7 +153,7 @@ else
     {
         message = null;
 
-        var book = await Context.Books.FirstOrDefaultAsync(b => b.Id == selectedBookId);
+        var book = await Context.Books.FirstOrDefaultAsync(b => b.Id == loanModel.BookId);
         if (book == null)
         {
             message = "Boken hittades inte.";
@@ -144,7 +161,7 @@ else
         }
 
         // OBS: MemberId är string Member-modell.
-        var member = await Context.Members.FirstOrDefaultAsync(m => m.MemberId == selectedMemberId);
+        var member = await Context.Members.FirstOrDefaultAsync(m => m.MemberId == loanModel.MemberId);
         if (member == null)
         {
             message = "Medlemmen hittades inte.";
@@ -178,9 +195,28 @@ else
         await Context.SaveChangesAsync();
 
         message = "Lån skapat.";
-        selectedBookId = 0;
-        selectedMemberId = "";
+        loanModel.BookId = 0;
+        loanModel.MemberId = "";
 
+        await ReloadData();
+
+    }
+
+    private async Task ReturnLoan(int loanId)
+    {
+        var loan = await Context.Loans
+            .Include(l => l.Book)
+            .FirstOrDefaultAsync(l => l.Id == loanId);
+
+        if (loan == null)
+            return;
+
+        loan.ReturnDate = DateTime.Now;
+
+        if (loan.Book != null)
+            loan.Book.MarkAsReturned();
+
+        await Context.SaveChangesAsync();
         await ReloadData();
     }
 }

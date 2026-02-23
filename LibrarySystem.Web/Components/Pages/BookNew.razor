@@ -1,0 +1,81 @@
+﻿@page "/books/new"
+@using System.ComponentModel.DataAnnotations
+@inject LibrarySystem.Data.Context.LibraryContext Context
+
+<h3>Lägg till ny bok</h3>
+
+<EditForm Model="@model" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">ISBN</label>
+        <InputText class="form-control" @bind-Value="model.ISBN" />
+        <ValidationMessage For="@(() => model.ISBN)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Titel</label>
+        <InputText class="form-control" @bind-Value="model.Title" />
+        <ValidationMessage For="@(() => model.Title)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Författare</label>
+        <InputText class="form-control" @bind-Value="model.Author" />
+        <ValidationMessage For="@(() => model.Author)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">År</label>
+        <InputNumber class="form-control" @bind-Value="model.PublishedYear" />
+        <ValidationMessage For="@(() => model.PublishedYear)" />
+    </div>
+
+    <button class="btn btn-primary" type="submit">Spara</button>
+    <a class="btn btn-outline-secondary ms-2" href="/books">Avbryt</a>
+</EditForm>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <div class="alert alert-info mt-3">@message</div>
+}
+
+@code {
+    private string? message;
+    private BookForm model = new();
+
+    private async Task HandleSubmit()
+    {
+        message = null;
+
+        var book = new LibrarySystem.Core.Models.Book(
+             model.Title!.Trim(),
+             model.Author!.Trim(),
+             model.PublishedYear!.Value,
+             model.ISBN!.Trim()
+            );
+
+        Context.Books.Add(book);
+        await Context.SaveChangesAsync();
+
+        message = "Bok sparad!";
+        model = new BookForm();
+    }
+
+    private class BookForm
+    {
+        [Required(ErrorMessage = "ISBN krävs")]
+        public string? ISBN { get; set; }
+
+        [Required(ErrorMessage = "Titel krävs")]
+        public string? Title { get; set; }
+
+        [Required(ErrorMessage = "Författare krävs")]
+        public string? Author { get; set; }
+
+        [Required(ErrorMessage = "År krävs")]
+        [Range(1000, 2100, ErrorMessage = "År måste vara mellan 1000 och 2100")]
+        public int? PublishedYear { get; set; }
+    }
+}
