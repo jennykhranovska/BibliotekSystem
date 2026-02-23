@@ -2,8 +2,8 @@
 @using Microsoft.EntityFrameworkCore
 @inject LibrarySystem.Data.Context.LibraryContext Context
 
-<h1>Välkommen</h1>
-<p>Snabböversikt av biblioteket.</p>
+<h1>Översikt</h1>
+<p>Snabbstatus för biblioteket.</p>
 
 @if (!loaded)
 {
@@ -11,18 +11,30 @@
 }
 else
 {
-    <ul>
-        <li>Antal böcker: @bookCount</li>
-        <li>Antal medlemmar: @memberCount</li>
-        <li>Aktiva lån: @activeLoanCount</li>
-        <li>Försenade lån: @overdueLoanCount</li>
-    </ul>
 
-    <nav>
-        <a href="/books">Böcker</a> |
-        <a href="/members">Medlemmar</a> |
-        <a href="/loans">Utlåning</a>
-    </nav>
+    <div class="dash-grid">
+        <div class="dash-card">
+            <div class="dash-title">Böcker</div>
+            <div class="dash-value">@bookCount</div>
+        </div>
+
+        <div class="dash-card">
+            <div class="dash-title">Medlemmar</div>
+            <div class="dash-value">@memberCount</div>
+        </div>
+
+        <div class="dash-card">
+            <div class="dash-title">Aktiva lån</div>
+            <div class="dash-value">@activeLoanCount</div>
+        </div>
+
+        <div class="dash-card">
+            <div class="dash-title">Försenade</div>
+            <div class="dash-value">@overdueLoanCount</div>
+        </div>
+    </div>
+
+  
 }
 
 @code {

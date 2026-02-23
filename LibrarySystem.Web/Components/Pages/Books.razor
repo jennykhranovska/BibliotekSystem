@@ -2,14 +2,13 @@
 @using LibrarySystem.Core.Models
 @using Microsoft.EntityFrameworkCore
 @inject LibrarySystem.Data.Context.LibraryContext Context
+<h1>Böcker</h1>
 
-<h3>Boklista</h3>
+<div class="d-flex gap-2 align-items-center mb-3">
+    <a class="btn btn-primary" href="/books/new">+ Lägg till bok</a>
 
-<a class="btn btn-primary mb-3" href="/books/new">
-    Lägg till bok
-</a>
-<div class="mb-3">
     <input class="form-control"
+           style="max-width: 380px;"
            placeholder="Sök på titel, författare eller ISBN..."
            @bind="searchTerm"
            @bind:event="oninput" />
@@ -21,6 +20,8 @@
 }
 else
 {
+    <p class="text-muted">Visar @FilteredAndSortedBooks().Count() av @(books?.Count ?? 0) böcker</p>
+
     <table class="table table-striped">
         <thead>
             <tr>
@@ -30,35 +31,24 @@ else
                 <th style="cursor:pointer" @onclick="() => SortBy(nameof(Book.Author))">
                     Författare @SortIcon(nameof(Book.Author))
                 </th>
-                <th style="cursor:pointer" @onclick="() => SortBy(nameof(Book.PublishedYear))">
-                    År @SortIcon(nameof(Book.PublishedYear))
-                </th>
                 <th style="cursor:pointer" @onclick="() => SortBy(nameof(Book.ISBN))">
                     ISBN @SortIcon(nameof(Book.ISBN))
                 </th>
-                <th style="cursor:pointer" @onclick="() => SortBy(nameof(Book.IsAvailable))">
-                    Status @SortIcon(nameof(Book.IsAvailable))
-                </th>
+                <th>Status</th>
                 <th></th>
             </tr>
         </thead>
+
         <tbody>
             @foreach (var b in FilteredAndSortedBooks())
             {
                 <tr>
                     <td>@b.Title</td>
                     <td>@b.Author</td>
-                    <td>@b.PublishedYear</td>
                     <td>@b.ISBN</td>
                     <td>
-                        @if (b.IsAvailable)
-                        {
-                            <span class="badge bg-success">Tillgänglig</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-danger">Utlånad</span>
-                        }
+                        <span class="status-dot @(b.IsAvailable ? "ok" : "no")"></span>
+                        <span class="ms-2">@(b.IsAvailable ? "Tillgänglig" : "Utlånad")</span>
                     </td>
                     <td>
                         <a class="btn btn-sm btn-outline-primary" href="@($"/books/{b.Id}")">Detaljer</a>
@@ -68,6 +58,7 @@ else
         </tbody>
     </table>
 }
+
 @code {
     private List<Book>? books;
     private string searchTerm = "";
