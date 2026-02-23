@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using LibrarySystem.Core.Interfaces;
+using LibrarySystem.Data.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace LibrarySystem.Core.Models
 {
@@ -14,13 +16,10 @@ namespace LibrarySystem.Core.Models
         {
         }
 
-      
         public BookCatalog(IBookRepository repo)
         {
             _repo = repo;
         }
-
- 
 
         public void AddBook(Book book)
             => _repo.AddAsync(book).GetAwaiter().GetResult();

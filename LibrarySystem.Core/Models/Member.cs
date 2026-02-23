@@ -52,4 +52,6 @@ namespace LibrarySystem.Core.Models
                 || (Email?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false);
         }
     }
+
+  
 }
