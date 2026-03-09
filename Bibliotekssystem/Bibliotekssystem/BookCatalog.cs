@@ -1,7 +1,8 @@
 ﻿using LibrarySystem.Core.Interfaces;
 using LibrarySystem.Core.Models;
 
-public class InMemoryBookRepository : IBookRepository
+public class BookCatalog
+
 {
     private readonly List<Book> _books = new();
 
@@ -65,5 +66,9 @@ public class InMemoryBookRepository : IBookRepository
         // Om du inte har en IsAvailable-property,
         // returnera alla så länge
         return Task.FromResult<IEnumerable<Book>>(_books.ToList());
+    }
+    public void AddBook(Book book)
+    {
+        _books.Add(book);
     }
 }

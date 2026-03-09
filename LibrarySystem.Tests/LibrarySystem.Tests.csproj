@@ -8,17 +8,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="bunit" Version="2.6.2" />
     <PackageReference Include="coverlet.collector" Version="6.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.13" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
-	 <PackageReference Include="bunit.web" Version="1.*" />
-	 <PackageReference Include="bunit" Version="1.*" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Bibliotekssystem\Bibliotekssystem\Bibliotekssystem.csproj" />
+    <ProjectReference Include="..\LibrarySystem.Core\LibrarySystem.Core.csproj" />
+    <ProjectReference Include="..\LibrarySystem.Data\LibrarySystem.Data.csproj" />
     <ProjectReference Include="..\LibrarySystem.Web\LibrarySystem.Web.csproj" />
   </ItemGroup>
 
