@@ -13,11 +13,16 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+	 <PackageReference Include="bunit.web" Version="1.*" />
+	 <PackageReference Include="bunit" Version="1.*" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Bibliotekssystem\Bibliotekssystem\Bibliotekssystem.csproj" />
   </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\LibrarySystem.Web\LibrarySystem.Web.csproj" />
+	</ItemGroup>
 
   <ItemGroup>
     <Using Include="Xunit" />

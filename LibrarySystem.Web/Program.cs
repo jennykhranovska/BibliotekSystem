@@ -1,6 +1,12 @@
+
+
+using LibrarySystem.Core.Interfaces;
 using LibrarySystem.Data.Context;
-using Microsoft.EntityFrameworkCore;
+using LibrarySystem.Data.Repositories;
 using LibrarySystem.Web.Components;
+using Microsoft.EntityFrameworkCore;
+
+
 
 namespace LibrarySystem.Web
 {
@@ -16,7 +22,15 @@ namespace LibrarySystem.Web
 
             builder.Services.AddDbContext<LibraryContext>(options =>
     options.UseSqlite("Data Source=library.db"));
+            builder.Services.AddScoped<IBookRepository, BookRepository>();
+
+            builder.Services.AddScoped<IMemberRepository, MemberRepository>();
+
+            builder.Services.AddScoped<ILoanRepository, LoanRepository>();
+
+
             var app = builder.Build();
+
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())

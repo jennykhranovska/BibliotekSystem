@@ -1,5 +1,40 @@
 ﻿@page "/statistics"
+@using Microsoft.EntityFrameworkCore
+@inject LibrarySystem.Data.Context.LibraryContext Context
 
 <h1>Statistik</h1>
 
-<p>Här visas statistik över bibliotekets böcker och lån.</p>
+@if (!loaded)
+{
+    <p>Laddar statistik...</p>
+}
+else
+{
+    <ul>
+        <li>Totalt antal böcker: @bookCount</li>
+        <li>Totalt antal medlemmar: @memberCount</li>
+        <li>Aktiva lån: @activeLoans</li>
+        <li>Returnerade lån: @returnedLoans</li>
+        <li>Försenade lån: @overdueLoans</li>
+    </ul>
+}
+
+@code {
+    private bool loaded;
+    private int bookCount;
+    private int memberCount;
+    private int activeLoans;
+    private int returnedLoans;
+    private int overdueLoans;
+
+    protected override async Task OnInitializedAsync()
+    {
+        bookCount = await Context.Books.CountAsync();
+        memberCount = await Context.Members.CountAsync();
+        activeLoans = await Context.Loans.CountAsync(l => l.ReturnDate == null);
+        returnedLoans = await Context.Loans.CountAsync(l => l.ReturnDate != null);
+        overdueLoans = await Context.Loans.CountAsync(l => l.ReturnDate == null && l.DueDate < DateTime.Now);
+
+        loaded = true;
+    }
+}

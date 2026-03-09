@@ -1,10 +1,8 @@
 ﻿using LibrarySystem.Core.Interfaces;
 using LibrarySystem.Core.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using LibrarySystem.Data.Context;
 
@@ -30,7 +28,7 @@ namespace LibrarySystem.Data.Repositories
 
         public async Task AddAsync(Book book)
         {
-            await _context.Books.AddAsync(book);
+            _context.Books.Add(book);
             await _context.SaveChangesAsync();
         }
 
@@ -61,6 +59,15 @@ namespace LibrarySystem.Data.Repositories
                     b.Title.Contains(searchTerm) ||
                     b.Author.Contains(searchTerm) ||
                     b.ISBN.Contains(searchTerm))
+                .ToListAsync();
+        }
+
+        // Ny implementation för GetAvailableAsync som interfacet kräver
+        public async Task<IEnumerable<Book>> GetAvailableAsync()
+        {
+            return await _context.Books
+                .Where(b => b.IsAvailable)
+                .OrderBy(b => b.Title)
                 .ToListAsync();
         }
     }

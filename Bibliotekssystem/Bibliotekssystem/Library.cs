@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LibrarySystem.Core.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,9 +25,10 @@ namespace LibrarySystem.Core.Models
         }
 
 
+        // FIX: använd det passerade bookCatalog-argumentet istället för att skapa en ny instans
         public Library(BookCatalog bookCatalog)
         {
-            BookCatalog = new BookCatalog();
+            BookCatalog = bookCatalog ?? throw new ArgumentNullException(nameof(bookCatalog));
             MemberRegistry = new MemberRegistry();
             LoanManager = new LoanManager();
         }
@@ -79,11 +81,18 @@ namespace LibrarySystem.Core.Models
 
             if (loans.Count == 0) return null;
 
-            return loans
-                .GroupBy(l => l.Member)
+            // Robustare: gruppera efter MemberId (string) istället för Member-objekt
+            var topMemberId = loans
+                .Where(l => l.Member != null && !string.IsNullOrEmpty(l.Member.MemberId))
+                .GroupBy(l => l.Member!.MemberId)
                 .OrderByDescending(g => g.Count())
                 .Select(g => g.Key)
                 .FirstOrDefault();
+
+            if (topMemberId == null) return null;
+
+            // Hämta en Member-instans från lånen som matchar id:t
+            return loans.Select(l => l.Member).FirstOrDefault(m => m != null && m.MemberId == topMemberId);
         }
 
     }

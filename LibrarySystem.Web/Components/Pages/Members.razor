@@ -1,9 +1,11 @@
 ﻿@page "/members"
 @using LibrarySystem.Core.Models
-@using Microsoft.EntityFrameworkCore
-@inject LibrarySystem.Data.Context.LibraryContext Context
+@using LibrarySystem.Core.Interfaces
+@inject IMemberRepository MemberRepo
+@inject ILoanRepository LoanRepo
 
-<h3>Medlemmar</h3>
+<h1>Medlemmar</h1>
+<a class="btn btn-primary mb-3" href="/members/new">Ny medlem</a>
 
 @if (members == null)
 {
@@ -48,13 +50,14 @@ else
 }
 
 @code {
+   
     private List<Member>? members;
-    private List<Loan> loans = new();
+    private IReadOnlyList<Loan> loans = Array.Empty<Loan>();
 
     protected override async Task OnInitializedAsync()
     {
-        members = await Context.Members.AsNoTracking().ToListAsync();
-        loans = await Context.Loans.AsNoTracking().ToListAsync();
+        members = await MemberRepo.GetAllAsync();
+        loans = await LoanRepo.GetAllAsync();
     }
 
     private int ActiveLoansFor(string memberId)

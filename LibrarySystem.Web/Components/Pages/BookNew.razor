@@ -1,10 +1,16 @@
 ﻿@page "/books/new"
 @using System.ComponentModel.DataAnnotations
-@inject LibrarySystem.Data.Context.LibraryContext Context
+@using LibrarySystem.Core.Interfaces
+@inject IBookRepository BookRepo
+@rendermode InteractiveServer
+
 
 <h3>Lägg till ny bok</h3>
 
-<EditForm Model="@model" OnValidSubmit="HandleSubmit">
+<EditForm Model="@model"
+          OnValidSubmit="HandleSubmit"
+          FormName="NewBookForm">
+
     <DataAnnotationsValidator />
     <ValidationSummary />
 
@@ -34,6 +40,7 @@
 
     <button class="btn btn-primary" type="submit">Spara</button>
     <a class="btn btn-outline-secondary ms-2" href="/books">Avbryt</a>
+
 </EditForm>
 
 @if (!string.IsNullOrWhiteSpace(message))
@@ -49,18 +56,24 @@
     {
         message = null;
 
-        var book = new LibrarySystem.Core.Models.Book(
-             model.Title!.Trim(),
-             model.Author!.Trim(),
-             model.PublishedYear!.Value,
-             model.ISBN!.Trim()
+        try
+        {
+            var book = new LibrarySystem.Core.Models.Book(
+                model.Title!.Trim(),
+                model.Author!.Trim(),
+                model.PublishedYear!.Value,
+                model.ISBN!.Trim()
             );
 
-        Context.Books.Add(book);
-        await Context.SaveChangesAsync();
+            await BookRepo.AddAsync(book);
 
-        message = "Bok sparad!";
-        model = new BookForm();
+            message = "Bok sparad!";
+            model = new BookForm();
+        }
+        catch (Exception ex)
+        {
+            message = $"Fel vid sparande: {ex.Message}";
+        }
     }
 
     private class BookForm

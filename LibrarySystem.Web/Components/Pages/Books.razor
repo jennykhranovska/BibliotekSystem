@@ -1,7 +1,8 @@
 ﻿@page "/books"
 @using LibrarySystem.Core.Models
-@using Microsoft.EntityFrameworkCore
-@inject LibrarySystem.Data.Context.LibraryContext Context
+@using LibrarySystem.Core.Interfaces
+@inject IBookRepository BookRepo
+
 <h1>Böcker</h1>
 
 <div class="d-flex gap-2 align-items-center mb-3">
@@ -68,7 +69,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        books = await Context.Books.AsNoTracking().ToListAsync();
+       
+        books = (await BookRepo.GetAllAsync()).ToList();
     }
 
     private IEnumerable<Book> FilteredAndSortedBooks()

@@ -1,10 +1,12 @@
 ﻿@page "/members/new"
 @using System.ComponentModel.DataAnnotations
-@inject LibrarySystem.Data.Context.LibraryContext Context
+@using LibrarySystem.Core.Interfaces
+@inject IMemberRepository MemberRepo
+@rendermode InteractiveServer
 
 <h1>Registrera ny medlem</h1>
 
-<EditForm Model="@model" OnValidSubmit="HandleSubmit">
+<EditForm Model="@model" OnValidSubmit="HandleSubmit" FormName="MemberForm">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
@@ -49,8 +51,8 @@
             model.Email!
         );
 
-        Context.Members.Add(member);
-        await Context.SaveChangesAsync();
+        await MemberRepo.AddAsync(member);
+        await MemberRepo.SaveAsync();
 
         message = "Medlem sparad!";
         model = new MemberForm();

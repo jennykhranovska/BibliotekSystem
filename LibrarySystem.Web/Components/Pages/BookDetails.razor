@@ -1,7 +1,8 @@
 ﻿@page "/books/{id:int}"
 @using LibrarySystem.Core.Models
-@using Microsoft.EntityFrameworkCore
-@inject LibrarySystem.Data.Context.LibraryContext Context
+@using LibrarySystem.Core.Interfaces
+@inject IBookRepository BookRepo
+@inject ILoanRepository LoanRepo
 
 <h3>Bokdetaljer</h3>
 
@@ -57,13 +58,16 @@ else
     private Book? book;
     private List<Loan> loans = new();
 
+
     protected override async Task OnParametersSetAsync()
     {
-        book = await Context.Books.AsNoTracking().FirstOrDefaultAsync(b => b.Id == id);
+        book = await BookRepo.GetByIdAsync(id);
 
-        loans = await Context.Loans.AsNoTracking()
+        var allLoans = await LoanRepo.GetAllAsync();
+        loans = allLoans
             .Where(l => l.BookId == id)
             .OrderByDescending(l => l.LoanDate)
-            .ToListAsync();
+            .ToList();
     }
+
 }

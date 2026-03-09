@@ -1,9 +1,13 @@
 ﻿@page "/loans"
 @using LibrarySystem.Core.Models
-@using Microsoft.EntityFrameworkCore
-@inject LibrarySystem.Data.Context.LibraryContext Context
+@using LibrarySystem.Core.Interfaces
+@using System.ComponentModel.DataAnnotations
+@inject IBookRepository BookRepo
+@inject IMemberRepository MemberRepo
+@inject ILoanRepository LoanRepo
+@rendermode InteractiveServer
 
-<h3>Utlåning</h3>
+<h1>Utlåning</h1>
 
 @if (!loaded)
 {
@@ -13,7 +17,7 @@ else
 {
     <h5>Nytt lån</h5>
 
-    <EditForm Model="@loanModel" OnValidSubmit="CreateLoan">
+    <EditForm Model="@loanModel" OnValidSubmit="CreateLoan" FormName="CreateLoanForm">
         <DataAnnotationsValidator />
         <ValidationSummary />
 
@@ -96,6 +100,12 @@ else
                                 <span class="badge bg-success">OK</span>
                             }
                         </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    @onclick="() => ReturnLoan(l.Id)">
+                                Returnera
+                            </button>
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -115,11 +125,11 @@ else
 
     private class LoanForm
     {
-        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Välj bok")]
-        [System.ComponentModel.DataAnnotations.Range(1, int.MaxValue, ErrorMessage = "Välj bok")]
+        [Required(ErrorMessage = "Välj bok")]
+        [Range(1, int.MaxValue, ErrorMessage = "Välj bok")]
         public int BookId { get; set; }
 
-        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Välj medlem")]
+        [Required(ErrorMessage = "Välj medlem")]
         public string? MemberId { get; set; }
     }
 
@@ -131,92 +141,87 @@ else
 
     private async Task ReloadData()
     {
-        availableBooks = await Context.Books.AsNoTracking()
-            .Where(b => b.IsAvailable)
-            .OrderBy(b => b.Title)
-            .ToListAsync();
-
-        members = await Context.Members.AsNoTracking()
-            .OrderBy(m => m.Name)
-            .ToListAsync();
-
-        activeLoans = await Context.Loans
-            .AsNoTracking()
-            .Include(l => l.Book)
-            .Include(l => l.Member)
-            .Where(l => l.ReturnDate == null)
-            .OrderByDescending(l => l.LoanDate)
-            .ToListAsync();
+        // Repository calls (ingen EF i UI)
+        availableBooks = (await BookRepo.GetAvailableAsync()).ToList();
+        members = (await MemberRepo.GetAllAsync()).ToList();
+        activeLoans = (await LoanRepo.GetActiveLoansAsync()).ToList();
     }
 
     private async Task CreateLoan()
     {
         message = null;
 
-        var book = await Context.Books.FirstOrDefaultAsync(b => b.Id == loanModel.BookId);
-        if (book == null)
+        try
         {
-            message = "Boken hittades inte.";
-            return;
+            var book = await BookRepo.GetByIdAsync(loanModel.BookId);
+            if (book is null)
+            {
+                message = "Boken hittades inte.";
+                return;
+            }
+
+            var member = await MemberRepo.GetByMemberIdAsync(loanModel.MemberId ?? "");
+            if (member is null)
+            {
+                message = "Medlemmen hittades inte.";
+                return;
+            }
+
+            if (!book.IsAvailable)
+            {
+                message = "Boken är inte tillgänglig.";
+                return;
+            }
+
+            var loanDate = DateTime.Now;
+            var dueDate = loanDate.AddDays(14);
+
+            var loan = new Loan
+            {
+                BookId = book.Id,
+                MemberId = member.MemberId,
+                LoanDate = loanDate,
+                DueDate = dueDate,
+                ReturnDate = null
+            };
+
+            // Uppdatera bokstatus
+            book.MarkAsLoaned();
+
+            await LoanRepo.AddAsync(loan);
+            await LoanRepo.SaveAsync();
+
+            message = "Lån skapat.";
+            loanModel.BookId = 0;
+            loanModel.MemberId = "";
+
+            await ReloadData();
         }
-
-        // OBS: MemberId är string Member-modell.
-        var member = await Context.Members.FirstOrDefaultAsync(m => m.MemberId == loanModel.MemberId);
-        if (member == null)
+        catch
         {
-            message = "Medlemmen hittades inte.";
-            return;
+            message = "Kunde inte skapa lån. Försök igen.";
         }
-
-        if (!book.IsAvailable)
-        {
-            message = "Boken är inte tillgänglig.";
-            return;
-        }
-
-        var loanDate = DateTime.Now;
-        var dueDate = loanDate.AddDays(14);
-
-        // Skapa lån och uppdatera bokstatus
-        var loan = new Loan
-        {
-            BookId = book.Id,
-            Book = book,
-            Member = member,
-            MemberId = member.MemberId, 
-            LoanDate = loanDate,
-            DueDate = dueDate,
-            ReturnDate = null
-        };
-
-        book.MarkAsLoaned();
-
-        Context.Loans.Add(loan);
-        await Context.SaveChangesAsync();
-
-        message = "Lån skapat.";
-        loanModel.BookId = 0;
-        loanModel.MemberId = "";
-
-        await ReloadData();
-
     }
 
     private async Task ReturnLoan(int loanId)
     {
-        var loan = await Context.Loans
-            .Include(l => l.Book)
-            .FirstOrDefaultAsync(l => l.Id == loanId);
+        try
+        {
+            var loan = await LoanRepo.GetByIdWithDetailsAsync(loanId);
+            if (loan is null)
+                return;
 
-        if (loan == null)
-            return;
+            loan.ReturnDate = DateTime.Now;
 
-        loan.ReturnDate = DateTime.Now;
+            if (loan.Book != null)
+                loan.Book.MarkAsReturned();
 
-        if (loan.Book != null)
-            loan.Book.MarkAsReturned();
-
-        await Context.SaveChangesAsync();
-        await ReloadData();
+            await LoanRepo.SaveAsync();
+            await ReloadData();
+        }
+        catch
+        {
+            message = "Kunde inte returnera lånet. Försök igen.";
+        }
     }
-}
+}      
