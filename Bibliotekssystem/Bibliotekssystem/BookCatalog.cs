@@ -71,4 +71,9 @@ public class BookCatalog
     {
         _books.Add(book);
     }
+
+    public List<Book> GetBooks()
+    {
+        return _books.ToList();
+    }
 }

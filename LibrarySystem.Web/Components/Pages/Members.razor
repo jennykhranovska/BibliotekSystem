@@ -17,17 +17,24 @@ else if (!members.Any())
 }
 else
 {
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Medlemsnummer</th>
-                <th>Namn</th>
-                <th>Email</th>
-                <th>Medlem sedan</th>
-                <th>Aktiva lån</th>
-                <th></th>
-            </tr>
-        </thead>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Medlemsnummer</th>
+                    <th>Namn</th>
+                    <th>Email</th>
+                    <th>Medlem sedan</th>
+                    <th>Aktiva lån</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <!-- dina rader -->
+            </tbody>
+        </table>
+    </div>
         <tbody>
             @foreach (var m in members)
             {
@@ -46,7 +53,6 @@ else
                 </tr>
             }
         </tbody>
-    </table>
 }
 
 @code {
