@@ -29,31 +29,28 @@ else
                     <th></th>
                 </tr>
             </thead>
-
             <tbody>
-                <!-- dina rader -->
+                @foreach (var m in members)
+                {
+                    <tr>
+                        <td>@m.MemberId</td>
+                        <td>@m.Name</td>
+                        <td>@m.Email</td>
+                        <td>@m.MemberSince.ToShortDateString()</td>
+                        <td>@ActiveLoansFor(m.MemberId)</td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-primary"
+                               href="@($"/members/{m.MemberId}")">
+                                Detaljer
+                            </a>
+                        </td>
+                    </tr>
+                }
             </tbody>
         </table>
     </div>
-        <tbody>
-            @foreach (var m in members)
-            {
-                <tr>
-                    <td>@m.MemberId</td>
-                    <td>@m.Name</td>
-                    <td>@m.Email</td>
-                    <td>@m.MemberSince.ToShortDateString()</td>
-                    <td>@ActiveLoansFor(m.MemberId)</td>
-                    <td>
-                        <a class="btn btn-sm btn-outline-primary"
-                           href="@($"/members/{m.MemberId}")">
-                            Detaljer
-                        </a>
-                    </td>
-                </tr>
-            }
-        </tbody>
 }
+
 
 @code {
    

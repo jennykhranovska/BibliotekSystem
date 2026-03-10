@@ -30,28 +30,25 @@ Systemet innehåller följande huvudsakliga entiteter:
 * Name (Namn)
 * Email
 
+
 ### Lån
 
-* Book (Bok)
-* Member (Medlem)
+* Id
+* BookId
+* MemberId
 * LoanDate (Lånedatum)
 * ReturnDate (Återlämningsdatum)
 
 Dessa modeller används för att hantera böcker, medlemmar och lån i bibliotekssystemet.
 
+### Relationer
+
+- En **Book** kan ha flera **Loans**
+- En **Member** kan ha flera **Loans**
+- En **Loan** kopplar en **Book** till en **Member**
+
 ## Skärmbilder
 
 ### Översikt
-![Översikt](images/overview.png)
+![Översikt](screenshots/overview.png)
 
-### Böcker
-
-*(Lägg in en bild på sidan där böcker visas)*
-
-### Medlemmar
-
-*(Lägg in en bild på sidan där medlemmar visas)*
-
-### Lån
-
-*(Lägg in en bild på sidan där lån hanteras)*
